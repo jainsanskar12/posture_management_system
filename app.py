@@ -51,33 +51,58 @@ for sensor in advanced_sensors:
 st.write("## Live Sensor Readings (Simulated)")
 st.dataframe(df)
 
+# Page 2 - User Dashboard
+if st.button("View User Dashboard"):
+    st.subheader("User Dashboard")
+    st.write("### Activity Overview")
+    
+    # Count occurrences where values exceeded the specified range
+    activity_data = {}
+    for sensor in advanced_sensors:
+        for param in parameters:
+            column_name = f"{sensor} - {param}"
+            min_range = st.session_state.get(f"{sensor}_{param}_min", 0)
+            max_range = st.session_state.get(f"{sensor}_{param}_max", 256)
+            out_of_range_count = ((df[column_name] < min_range) | (df[column_name] > max_range)).sum()
+            activity_data[column_name] = out_of_range_count
+
+    # Display summary in a table format
+    st.write("#### Out-of-Range Activity Summary")
+    user_df = pd.DataFrame(activity_data.items(), columns=["Sensor Parameter", "Times Out of Range"])
+    st.dataframe(user_df)
+
+    # Doctor's Recommendation (from Page 3)
+    doctor_suggestion = st.text_area("Recommendation by Doctor", "No recommendations yet.")
+    st.write(f"Doctor's Recommendation: {doctor_suggestion}")
+
 # Page 3 - Doctor's Dashboard
 if st.button("View Doctor's Dashboard"):
     st.subheader("Doctor's Dashboard")
-    st.write("### Detailed Analysis and Recommendations")
-    
-    # Trend analysis for each sensor parameter
-    st.write("#### Sensor Data Trends")
-    st.line_chart(df.set_index("Time"))
+    st.write("### Detailed Analysis and Suggestions")
 
-    # Calculate out-of-range occurrences for each sensor and parameter
-    out_of_range_summary = {}
+    # Simplified trend line for Flex Sensors only (to reduce complexity)
+    st.write("#### Simplified Trend for Flex Sensors")
+    st.line_chart(df[["Time", "Flex Sensor 1", "Flex Sensor 2"]].set_index("Time"))
+
+    # Out-of-Range Summary for Doctor
+    st.write("#### Out-of-Range Summary for Each Parameter")
+    doctor_summary = {}
     for sensor in advanced_sensors:
         for param in parameters:
             column_name = f"{sensor} - {param}"
             min_range, max_range = st.session_state.get(f"{sensor}_{param}_min", 0), st.session_state.get(f"{sensor}_{param}_max", 256)
             out_of_range = ((df[column_name] < min_range) | (df[column_name] > max_range)).sum()
-            out_of_range_summary[column_name] = out_of_range
+            doctor_summary[column_name] = out_of_range
 
-    # Display a summary of out-of-range incidents
-    st.write("#### Out-of-Range Summary")
-    for sensor, count in out_of_range_summary.items():
-        st.write(f"{sensor}: {count} times out of range")
+    # Display summary as a dataframe
+    st.write("Out-of-Range Summary")
+    summary_df = pd.DataFrame(doctor_summary.items(), columns=["Sensor Parameter", "Times Out of Range"])
+    st.dataframe(summary_df)
 
-    # Recommendation box for the doctor to enter suggestions for the patient
+    # Suggestion box for the doctor to give recommendations to the user
     doctor_suggestion = st.text_area("Doctor's Suggestion for Patient", "Provide recommendations based on the analysis.")
-    st.write(f"Doctor's Suggestion: {doctor_suggestion}")
-
+    
     # Button to send suggestion to the user
     if st.button("Send Suggestion to User"):
         st.success("Suggestion has been sent to the user.")
+        # This would typically involve a state update or database save to actually make it persist.
