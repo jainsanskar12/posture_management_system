@@ -1,8 +1,12 @@
 import streamlit as st
+import datetime
 
-# Session state initialization to track activity logging
+# Initialize session state for activity logging
 if 'activity_log' not in st.session_state:
-    st.session_state.activity_log = {sensor: 0 for sensor in ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]}
+    st.session_state.activity_log = {
+        sensor: {"exceed_count": 0, "last_exceed_time": None, "last_reading": 0}
+        for sensor in ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]
+    }
 
 # Function to switch pages
 def go_to_page(page_name):
@@ -10,21 +14,18 @@ def go_to_page(page_name):
 
 # Set the default page
 if 'current_page' not in st.session_state:
-    st.session_state.current_page = "Page 1"
+    st.session_state.current_page = "Settings"
 
-# Page 1: Sensor Range Settings and Live Feedback
-if st.session_state.current_page == "Page 1":
-    # Sensor names
+# Page: Sensor Range Settings and Live Feedback
+if st.session_state.current_page == "Settings":
     sensors = ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]
-    
-    # Initialize dictionary to hold sensor ranges
     sensor_ranges = {}
 
     # Streamlit Title and Header
     st.title("Posture Management System")
-    st.subheader("Enter Sensor Ranges")
+    st.subheader("Sensor Range Settings")
 
-    # Loop through each sensor to create input fields for min and max values
+    # Sensor range inputs
     for sensor in sensors:
         st.write(f"### {sensor} Range Settings")
         col1, col2 = st.columns(2)
@@ -34,7 +35,7 @@ if st.session_state.current_page == "Page 1":
             max_value = st.number_input(f"Maximum Value for {sensor}", min_value=0, max_value=1024, value=256, key=f"{sensor}_max")
         sensor_ranges[sensor] = (min_value, max_value)
 
-    # Placeholder for live sensor readings (for demonstration)
+    # Simulated live sensor readings
     sensor_readings = {
         "Flex Sensor 1": 150,
         "Flex Sensor 2": 100,
@@ -43,33 +44,42 @@ if st.session_state.current_page == "Page 1":
         "Accelerometer": 200
     }
 
-    # Display feedback section
+    # Feedback Mechanism
     st.write("## Feedback Mechanism")
     for sensor, (min_val, max_val) in sensor_ranges.items():
         reading = sensor_readings.get(sensor, 0)  # Simulated reading
         if reading < min_val or reading > max_val:
             st.error(f"⚠️ {sensor} reading out of range! Current Value: {reading}")
-            # Increment the exceedance count in session state for tracking
-            st.session_state.activity_log[sensor] += 1
+            # Log exceedance event with timestamp and update last reading
+            st.session_state.activity_log[sensor]["exceed_count"] += 1
+            st.session_state.activity_log[sensor]["last_exceed_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         else:
             st.success(f"✅ {sensor} reading within range. Current Value: {reading}")
+        
+        # Update the last reading
+        st.session_state.activity_log[sensor]["last_reading"] = reading
 
-    # Button to navigate to Page 2 (Data Activity)
-    if st.button("View Data Activity"):
-        go_to_page("Page 2")
+    # Button to navigate to User page
+    if st.button("User"):
+        go_to_page("User")
 
-# Page 2: Data Activity Log
-elif st.session_state.current_page == "Page 2":
-    st.title("Data Activity Log")
-    st.subheader("Sensor Range Exceedance Summary")
+# Page: User Activity Log and Insights
+elif st.session_state.current_page == "User":
+    st.title("User Activity Log")
+    st.subheader("Sensor Exceedance Summary and Insights")
 
-    # Display exceedance counts for each sensor
-    for sensor, count in st.session_state.activity_log.items():
-        st.write(f"{sensor} range exceeded **{count}** time(s).")
+    # Display exceedance counts and additional insights for each sensor
+    for sensor, data in st.session_state.activity_log.items():
+        st.write(f"### {sensor}")
+        st.markdown(f"""
+        - **Range Exceeded**: {data['exceed_count']} time(s)
+        - **Last Exceedance**: {data['last_exceed_time'] if data['last_exceed_time'] else 'N/A'}
+        - **Most Recent Reading**: {data['last_reading']}
+        """)
 
-    # Button to navigate back to Page 1
-    if st.button("Go Back to Sensor Settings"):
-        go_to_page("Page 1")
+    # Add navigation to return to Settings page
+    if st.button("Back to Settings"):
+        go_to_page("Settings")
 
 # Optional styling for a better appearance
 st.markdown("""
@@ -81,6 +91,10 @@ st.markdown("""
     .stAlert {       /* Style alerts to be more distinct */
         font-size: 1.1em;
         padding: 10px;
+    }
+    .stMarkdown h3 { /* Style subheadings for sensors */
+        color: #4a90e2;
+        margin-top: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
