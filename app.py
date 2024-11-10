@@ -65,7 +65,6 @@ def get_sensor_data():
         
         return flat_data
     except requests.RequestException as e:
-        st.error(f"Error fetching sensor data: {e}")
         return {}
 
 def update_thresholds(new_thresholds):
@@ -85,10 +84,8 @@ def update_thresholds(new_thresholds):
             st.success("Thresholds successfully updated on ESP32.")
             return True
         else:
-            st.error("Failed to update thresholds on ESP32.")
             return False
     except requests.RequestException as e:
-        st.error(f"Error updating thresholds: {e}")
         return False
 
 # ------------------------ Streamlit Application ------------------------
