@@ -1,12 +1,15 @@
 import streamlit as st
 import datetime
+import matplotlib.pyplot as plt
 
-# Initialize session state for activity logging
+# Initialize session state for activity logging and doctor suggestions
 if 'activity_log' not in st.session_state:
     st.session_state.activity_log = {
         sensor: {"exceed_count": 0, "last_exceed_time": None, "last_reading": 0}
         for sensor in ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]
     }
+if 'doctor_suggestions' not in st.session_state:
+    st.session_state.doctor_suggestions = ""
 
 # Function to switch pages
 def go_to_page(page_name):
@@ -16,7 +19,7 @@ def go_to_page(page_name):
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "Settings"
 
-# Page: Sensor Range Settings and Live Feedback
+# Page 1: Sensor Range Settings and Live Feedback
 if st.session_state.current_page == "Settings":
     sensors = ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]
     sensor_ranges = {}
@@ -63,7 +66,7 @@ if st.session_state.current_page == "Settings":
     if st.button("User"):
         go_to_page("User")
 
-# Page: User Activity Log and Insights
+# Page 2: User Activity Log and Insights
 elif st.session_state.current_page == "User":
     st.title("User Activity Log")
     st.subheader("Sensor Exceedance Summary and Insights")
@@ -77,22 +80,83 @@ elif st.session_state.current_page == "User":
         - **Most Recent Reading**: {data['last_reading']}
         """)
 
+    # Display doctor's suggestions
+    st.write("## Doctor's Recommendations")
+    st.text_area("Recommendation for the patient", st.session_state.doctor_suggestions, height=200)
+
     # Add navigation to return to Settings page
     if st.button("Back to Settings"):
         go_to_page("Settings")
 
-# Optional styling for a better appearance
+    # Optional Styling
+    st.markdown("""
+    <style>
+        .css-18e3th9 {
+            padding-top: 0px;
+            padding-bottom: 5px;
+        }
+        .stAlert {
+            font-size: 1.1em;
+            padding: 10px;
+        }
+        .stMarkdown h3 {
+            color: #4a90e2;
+            margin-top: 20px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Page 3: Doctor's Dashboard
+elif st.session_state.current_page == "Doctor":
+    st.title("Doctor's Dashboard")
+    st.subheader("Sensor Data and Insights")
+
+    # Display exceedance counts and sensor data trends (using graph)
+    for sensor, data in st.session_state.activity_log.items():
+        st.write(f"### {sensor} Insights")
+        st.markdown(f"""
+        - **Range Exceeded**: {data['exceed_count']} time(s)
+        - **Last Exceedance**: {data['last_exceed_time'] if data['last_exceed_time'] else 'N/A'}
+        - **Most Recent Reading**: {data['last_reading']}
+        """)
+
+        # Simulate plotting a graph for sensor reading trends (use a simple line plot)
+        readings = [data['last_reading']] * 10  # Example: 10 readings for simplicity
+        timestamps = [datetime.datetime.now() - datetime.timedelta(minutes=i) for i in range(10)]
+
+        fig, ax = plt.subplots()
+        ax.plot(timestamps, readings, marker='o', color='b')
+        ax.set_title(f"Sensor: {sensor} - Readings Over Time")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Reading Value")
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
+
+    # Doctor's suggestion box
+    st.write("### Suggestion for Patient")
+    doctor_suggestion = st.text_area("Write your recommendation here:", "", height=200)
+
+    # Button to submit suggestions to User page
+    if st.button("Submit Suggestion"):
+        st.session_state.doctor_suggestions = doctor_suggestion
+        st.success("Suggestion submitted successfully!")
+
+    # Add navigation to return to Settings page
+    if st.button("Back to Settings"):
+        go_to_page("Settings")
+
+# Optional Styling
 st.markdown("""
 <style>
-    .css-18e3th9 {  /* Adjust padding for Streamlit headers */
+    .css-18e3th9 {
         padding-top: 0px;
         padding-bottom: 5px;
     }
-    .stAlert {       /* Style alerts to be more distinct */
+    .stAlert {
         font-size: 1.1em;
         padding: 10px;
     }
-    .stMarkdown h3 { /* Style subheadings for sensors */
+    .stMarkdown h3 {
         color: #4a90e2;
         margin-top: 20px;
     }
