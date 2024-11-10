@@ -9,7 +9,7 @@ from datetime import datetime
 # Replace with your ESP32's IP address
 ESP32_IP = "192.168.201.190"  # e.g., "192.168.1.100"
 ESP32_PORT = 80
-ESP32_BASE_URL = f"http://{ESP32_IP}:{ESP32_PORT}"
+ESP32_BASE_URL = f"http://{ESP32_IP}"
 
 # Endpoint paths
 GET_ENDPOINT = "/api/data"
