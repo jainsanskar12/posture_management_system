@@ -71,9 +71,6 @@ if st.button("View User Dashboard"):
     user_df = pd.DataFrame(activity_data.items(), columns=["Sensor Parameter", "Times Out of Range"])
     st.dataframe(user_df)
 
-    # Doctor's Recommendation (from Page 3)
-    doctor_suggestion = st.text_area("Recommendation by Doctor", "No recommendations yet.")
-    st.write(f"Doctor's Recommendation: {doctor_suggestion}")
 
 # Page 3 - Doctor's Dashboard
 if st.button("View Doctor's Dashboard"):
