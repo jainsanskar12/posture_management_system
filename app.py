@@ -7,7 +7,7 @@ sensors = ["Flex Sensor 1", "Flex Sensor 2", "MPU 1", "MPU 2", "Accelerometer"]
 sensor_ranges = {}
 
 # Streamlit Title and Header
-st.title("Fuck Management System")
+st.title("Posture Management System")
 st.subheader("Enter Sensor Ranges")
 
 # Loop through each sensor to create input fields for min and max values
