@@ -74,6 +74,9 @@ if st.button("View User Dashboard"):
     user_df = pd.DataFrame(activity_data.items(), columns=["Sensor Parameter", "Times Out of Range"])
     st.dataframe(user_df)
 
+    # Display random data graph for user analysis
+    st.write("### User Sensor Activity Graph")
+    st.line_chart(df.set_index("Time")[["Flex Sensor 1", "Flex Sensor 2"]])
 
 # Page 3 - Doctor's Dashboard
 if st.button("View Doctor's Dashboard"):
@@ -98,6 +101,10 @@ if st.button("View Doctor's Dashboard"):
     st.write("Out-of-Range Summary")
     summary_df = pd.DataFrame(doctor_summary.items(), columns=["Sensor Parameter", "Times Out of Range"])
     st.dataframe(summary_df)
+
+    # Graph for the Doctor’s Dashboard (simplified for relevant sensors)
+    st.write("### Doctor's Analysis Graph")
+    st.line_chart(df.set_index("Time")[["MPU 1 - X", "MPU 1 - Y", "MPU 1 - Z"]])
 
     # Suggestion box for the doctor to give recommendations to the user
     doctor_suggestion = st.text_area("Doctor's Suggestion for Patient", "Provide recommendations based on the analysis.")
