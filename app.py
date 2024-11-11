@@ -52,7 +52,7 @@ st.write("## Live Sensor Readings (Simulated)")
 st.dataframe(df)
 
 # Add footer in a smaller font
-st.markdown("<p style='text-align: center; font-size: 12px;'>Made by Jhanvi and Sanskar</p>", unsafe_allow_html=True)
+#st.markdown("<p style='text-align: center; font-size: 12px;'>Made by Divya, Jhanvi and Sanskar</p>", unsafe_allow_html=True)
 
 # Page 2 - User Dashboard
 if st.button("View User Dashboard"):
